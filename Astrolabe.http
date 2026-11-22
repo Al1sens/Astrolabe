@@ -1,0 +1,6 @@
+@Astrolabe_HostAddress = http://localhost:5244
+
+GET {{Astrolabe_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
