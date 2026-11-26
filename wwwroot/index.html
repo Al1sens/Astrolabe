@@ -1,0 +1,1757 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Астролябия — Карта созвездий</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #010208;
+            color: #f3e5c8;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            overflow: hidden;
+            height: 100dvh;
+            width: 100vw;
+            position: fixed;
+            inset: 0;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: grab;
+        }
+
+            body:active {
+                cursor: grabbing;
+            }
+
+        /* =========================================================
+           1. ЖИВОЕ ТЁМНО-СИНЕЕ И ФИОЛЕТОВОЕ НОЧНОЕ НЕБО
+           ========================================================= */
+        .night-sky-gradient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(125deg, #010207 0%, #04091e 35%, #0b1642 68%, #1a0e3d 100%);
+            background-size: 200% 200%;
+            animation: skyGradientShift 11s ease-in-out infinite alternate;
+        }
+
+        .cosmos-violet-wave {
+            position: fixed;
+            inset: -20%;
+            z-index: 0;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 78% 35%, rgba(88, 28, 135, 0.36) 0%, rgba(49, 16, 82, 0.14) 45%, transparent 70%);
+            filter: blur(35px);
+            animation: waveMoveOne 9s ease-in-out infinite alternate;
+        }
+
+        .cosmos-blue-wave {
+            position: fixed;
+            inset: -20%;
+            z-index: 0;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 32% 72%, rgba(23, 55, 145, 0.34) 0%, rgba(12, 29, 82, 0.12) 48%, transparent 72%);
+            filter: blur(40px);
+            animation: waveMoveTwo 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes skyGradientShift {
+            0% {
+                background-position: 0% 20%;
+            }
+
+            100% {
+                background-position: 100% 80%;
+            }
+        }
+
+        @keyframes waveMoveOne {
+            0% {
+                transform: translate(3%, -3%) scale(0.95);
+                opacity: 0.65;
+            }
+
+            100% {
+                transform: translate(-5%, 4%) scale(1.12);
+                opacity: 1;
+            }
+        }
+
+        @keyframes waveMoveTwo {
+            0% {
+                transform: translate(-4%, 3%) scale(1.08);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: translate(5%, -4%) scale(0.96);
+                opacity: 0.95;
+            }
+        }
+
+        /* =========================================================
+           2. СТАРИННАЯ БРОНЗОВАЯ ПАНЕЛЬ (АДАПТИВНАЯ ДЛЯ ПК И ТЕЛЕФОНА)
+           ========================================================= */
+        .astrolabe-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 240px;
+            background: linear-gradient(165deg, rgba(15, 12, 24, 0.95), rgba(7, 8, 15, 0.98));
+            border: 1px solid #9c7838;
+            outline: 1px solid rgba(156, 120, 56, 0.25);
+            outline-offset: -4px;
+            padding: 12px 14px;
+            border-radius: 3px;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85), inset 0 0 18px rgba(156, 120, 56, 0.08);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: default;
+            touch-action: auto;
+        }
+
+            .astrolabe-panel::before,
+            .astrolabe-panel::after {
+                content: "✦";
+                position: absolute;
+                color: #c59b48;
+                font-size: 9px;
+                line-height: 1;
+            }
+
+            .astrolabe-panel::before {
+                top: 4px;
+                left: 5px;
+            }
+
+            .astrolabe-panel::after {
+                bottom: 4px;
+                right: 5px;
+            }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid rgba(156, 120, 56, 0.28);
+            padding-bottom: 5px;
+        }
+
+        .panel-title {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #c59b48;
+            margin: 0;
+        }
+
+        .panel-toggle-mobile {
+            display: none;
+            background: none;
+            border: 1px solid rgba(156, 120, 56, 0.5);
+            color: #fde047;
+            font-family: 'Georgia', serif;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .panel-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .astrolabe-panel input,
+        .astrolabe-panel select {
+            background: rgba(4, 5, 12, 0.92);
+            border: 1px solid #6e5324;
+            color: #f7ead2;
+            font-family: 'Georgia', serif;
+            padding: 7px 9px;
+            border-radius: 2px;
+            outline: none;
+            font-size: 12px;
+            width: 100%;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .astrolabe-panel input {
+            font-style: italic;
+        }
+
+            .astrolabe-panel input::placeholder {
+                color: rgba(212, 189, 146, 0.42);
+            }
+
+            .astrolabe-panel input:focus,
+            .astrolabe-panel select:focus {
+                border-color: #d4af37;
+                box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+            }
+
+        .btn-gold {
+            background: linear-gradient(180deg, #b88e3c 0%, #7d5b1e 100%);
+            border: 1px solid #e0be6b;
+            color: #0d0a05;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+            transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+
+            .btn-gold:hover {
+                filter: brightness(1.16);
+                box-shadow: 0 0 14px rgba(212, 175, 55, 0.45);
+            }
+
+        .btn-link-mode {
+            background: rgba(12, 15, 28, 0.9);
+            border: 1px solid #7d5b1e;
+            color: #d4af37;
+            font-family: 'Georgia', serif;
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 7px 10px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+            .btn-link-mode:hover {
+                border-color: #e0be6b;
+                background: rgba(156, 120, 56, 0.15);
+            }
+
+            .btn-link-mode.active {
+                background: rgba(212, 175, 55, 0.25);
+                border-color: #fde047;
+                color: #fef08a;
+                box-shadow: 0 0 12px rgba(250, 204, 21, 0.35);
+            }
+
+        .nav-hint {
+            font-size: 10px;
+            color: rgba(197, 155, 72, 0.72);
+            text-align: center;
+            font-style: italic;
+            line-height: 1.3;
+        }
+
+        /* =========================================================
+           3. БЕЗГРАНИЧНОЕ ПОЛОТНО НЕБА И SVG-СЛОЙ ДЛЯ ЛИНИЙ
+           ========================================================= */
+        #viewport {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #sky-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
+        #constellation-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: visible;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Невидимая широкая зона нажатия вокруг нити (удобно для пальца на телефоне) */
+        .constellation-hit-area {
+            stroke: transparent;
+            stroke-width: 18;
+            stroke-linecap: round;
+            pointer-events: stroke;
+            cursor: pointer;
+        }
+
+        .constellation-line {
+            stroke: rgba(235, 202, 126, 0.55);
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.45));
+            pointer-events: none;
+            transition: stroke 0.2s, stroke-width 0.2s;
+        }
+
+        .constellation-group:hover .constellation-line {
+            stroke: #f87171;
+            stroke-width: 2.5;
+            filter: drop-shadow(0 0 6px rgba(248, 113, 113, 0.8));
+        }
+
+        /* =========================================================
+           4. ЗВЁЗДЫ: ОТ СВЕТЛО-ЖЁЛТОГО К ТЁМНОМУ ЗОЛОТУ + РЕАЛИЗМ СЛОЖНОСТИ
+           ========================================================= */
+        .star {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            z-index: 3;
+            padding: 8px; /* Увеличенная область касания для пальцев на телефоне */
+
+            --core-fill: #fefce8;
+            --glow-inner: rgba(254, 249, 195, 0.75);
+            --glow-mid: rgba(254, 240, 138, 0.32);
+            --glow-outer: rgba(253, 224, 71, 0.12);
+            --drop-1: #fef9c3;
+            --drop-2: #fef08a;
+            --drop-3: rgba(250, 204, 21, 0.45);
+            --label-color: #fef9c3;
+        }
+
+            .star.stage-0 {
+                --core-fill: #fefce8;
+                --glow-inner: rgba(254, 249, 195, 0.72);
+                --glow-mid: rgba(254, 240, 138, 0.28);
+                --glow-outer: rgba(253, 224, 71, 0.10);
+                --drop-1: #ffffff;
+                --drop-2: #fef9c3;
+                --drop-3: rgba(253, 224, 71, 0.45);
+                --label-color: #fef9c3;
+            }
+
+            .star.stage-1 {
+                --core-fill: #ffffff;
+                --glow-inner: rgba(254, 240, 138, 0.92);
+                --glow-mid: rgba(250, 204, 21, 0.55);
+                --glow-outer: rgba(234, 179, 8, 0.22);
+                --drop-1: #ffffff;
+                --drop-2: #fde047;
+                --drop-3: #eab308;
+                --label-color: #fde047;
+            }
+
+            .star.stage-2 {
+                --core-fill: #fffbeb;
+                --glow-inner: rgba(251, 191, 36, 0.96);
+                --glow-mid: rgba(217, 119, 6, 0.65);
+                --glow-outer: rgba(180, 83, 9, 0.30);
+                --drop-1: #fde68a;
+                --drop-2: #f59e0b;
+                --drop-3: #b45309;
+                --label-color: #fbbf24;
+            }
+
+            .star.dragging {
+                cursor: grabbing;
+                z-index: 15;
+            }
+
+            .star.selected-for-link .star-visual::after {
+                content: "";
+                position: absolute;
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                border: 1.5px dashed #fde047;
+                animation: spinRing 6s linear infinite;
+            }
+
+        @keyframes spinRing {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .star-visual {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: starBrightPulse var(--duration, 2.2s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+            transition: transform 0.25s ease;
+        }
+
+        .star:hover .star-visual,
+        .star.dragging .star-visual {
+            transform: scale(1.38);
+        }
+
+        .star-trail-glow {
+            position: absolute;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: radial-gradient( circle, var(--glow-inner) 0%, var(--glow-mid) 34%, var(--glow-outer) 62%, transparent 78% );
+            filter: blur(4px);
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .star.diff-2 .star-trail-glow {
+            width: 48px;
+            height: 48px;
+        }
+
+        .star.diff-3 .star-trail-glow {
+            width: 64px;
+            height: 64px;
+            filter: blur(5px);
+        }
+
+        .star-corona-ring {
+            display: none;
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .star.diff-2 .star-corona-ring {
+            display: block;
+            width: 34px;
+            height: 34px;
+            background: radial-gradient(circle, transparent 42%, var(--glow-mid) 58%, transparent 72%);
+            opacity: 0.7;
+        }
+
+        .star.diff-3 .star-corona-ring {
+            display: block;
+            width: 54px;
+            height: 54px;
+            background: repeating-conic-gradient( from 0deg, var(--glow-mid) 0deg 4deg, transparent 4deg 30deg ), radial-gradient(circle, var(--glow-inner) 12%, transparent 68%);
+            mask-image: radial-gradient(circle, #000 18%, transparent 72%);
+            -webkit-mask-image: radial-gradient(circle, #000 18%, transparent 72%);
+            animation: spinRing 18s linear infinite;
+        }
+
+        .star-svg {
+            z-index: 2;
+            overflow: visible;
+            filter: drop-shadow(0 0 3px var(--drop-1)) drop-shadow(0 0 8px var(--drop-2)) drop-shadow(0 0 15px var(--drop-3));
+            transition: filter 0.4s ease;
+        }
+
+        .star.diff-1 .star-svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .star.diff-2 .star-svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .star.diff-3 .star-svg {
+            width: 38px;
+            height: 38px;
+        }
+
+        @keyframes starBrightPulse {
+            0%, 100% {
+                transform: scale(0.92) rotate(0deg);
+                filter: brightness(0.95);
+            }
+
+            45% {
+                transform: scale(1.15) rotate(4deg);
+                filter: brightness(1.35);
+            }
+
+            80% {
+                transform: scale(0.98) rotate(-3deg);
+                filter: brightness(1.08);
+            }
+        }
+
+        .star-label {
+            margin-top: 3px;
+            font-size: 11px;
+            color: var(--label-color);
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 4px #000000, 0 0 8px rgba(0, 0, 0, 1);
+            white-space: nowrap;
+            transition: color 0.25s;
+        }
+
+        .star:hover .star-label,
+        .star.dragging .star-label {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(254, 240, 138, 0.95), 0 1px 4px #000;
+        }
+
+        /* =========================================================
+           5. ПОЛЁТ ЗВЕЗДЫ НА ВЕТРУ С РЕАЛИСТИЧНЫМИ ЛУЧАМИ НА ВЕСЬ ЭКРАН
+           ========================================================= */
+        #star-flight-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 45;
+            pointer-events: none;
+            display: none;
+        }
+
+            #star-flight-layer.active {
+                display: block;
+            }
+
+        .flight-dimmer {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(18, 12, 34, 0.35), rgba(1, 2, 8, 0.78));
+            opacity: 0;
+            transition: opacity 2.5s ease;
+        }
+
+        #star-flight-layer.active .flight-dimmer {
+            opacity: 1;
+        }
+
+        .comet-traveler {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            margin-left: -22px;
+            margin-top: -22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            will-change: left, top, transform, opacity;
+        }
+
+        .comet-aura {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient( circle, rgba(255, 255, 255, 0.98) 0%, rgba(254, 240, 138, 0.82) 22%, rgba(245, 158, 11, 0.38) 48%, rgba(180, 83, 9, 0.12) 68%, transparent 80% );
+            filter: blur(6px);
+            animation: pulseCometAura 0.9s ease-in-out infinite alternate;
+        }
+
+        .comet-spike-horizontal {
+            position: absolute;
+            width: 140vmax;
+            height: 5px;
+            background: linear-gradient( 90deg, transparent 0%, rgba(245, 158, 11, 0.15) 20%, rgba(254, 240, 138, 0.75) 45%, #ffffff 50%, rgba(254, 240, 138, 0.75) 55%, rgba(245, 158, 11, 0.15) 80%, transparent 100% );
+            filter: blur(1px) drop-shadow(0 0 10px #fde047);
+            pointer-events: none;
+        }
+
+        .comet-spike-vertical {
+            position: absolute;
+            width: 5px;
+            height: 140vmax;
+            background: linear-gradient( 180deg, transparent 0%, rgba(245, 158, 11, 0.15) 20%, rgba(254, 240, 138, 0.75) 45%, #ffffff 50%, rgba(254, 240, 138, 0.75) 55%, rgba(245, 158, 11, 0.15) 80%, transparent 100% );
+            filter: blur(1px) drop-shadow(0 0 10px #fde047);
+            pointer-events: none;
+        }
+
+        .comet-spike-diag-1,
+        .comet-spike-diag-2 {
+            position: absolute;
+            width: 95vmax;
+            height: 3px;
+            background: linear-gradient( 90deg, transparent 0%, rgba(251, 191, 36, 0.12) 25%, rgba(254, 240, 138, 0.65) 47%, #ffffff 50%, rgba(254, 240, 138, 0.65) 53%, rgba(251, 191, 36, 0.12) 75%, transparent 100% );
+            filter: blur(0.8px) drop-shadow(0 0 8px #f59e0b);
+            pointer-events: none;
+        }
+
+        .comet-spike-diag-1 {
+            transform: rotate(45deg);
+        }
+
+        .comet-spike-diag-2 {
+            transform: rotate(-45deg);
+        }
+
+        .comet-rays {
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: repeating-conic-gradient( from 0deg, rgba(254, 240, 138, 0.5) 0deg 3deg, transparent 3deg 15deg );
+            mask-image: radial-gradient(circle, #000 12%, transparent 72%);
+            -webkit-mask-image: radial-gradient(circle, #000 12%, transparent 72%);
+            animation: spinCometRays 7s linear infinite;
+        }
+
+        @keyframes pulseCometAura {
+            0% {
+                transform: scale(0.92);
+                opacity: 0.88;
+            }
+
+            100% {
+                transform: scale(1.22);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spinCometRays {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .comet-core-svg {
+            width: 44px;
+            height: 44px;
+            z-index: 3;
+            filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 18px #fde047) drop-shadow(0 0 36px #d97706);
+        }
+
+        .supernova-shockwave {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            margin-left: -10px;
+            margin-top: -10px;
+            border-radius: 50%;
+            border: 3px solid #fef08a;
+            box-shadow: 0 0 35px #ffffff, 0 0 70px #fde047, inset 0 0 35px #f59e0b;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+            .supernova-shockwave.burst {
+                animation: shockwaveExpand 0.65s cubic-bezier(0.12, 0.85, 0.25, 1) forwards;
+            }
+
+        @keyframes shockwaveExpand {
+            0% {
+                opacity: 1;
+                transform: scale(0.5);
+                background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(251,191,36,0.65) 50%, transparent 75%);
+            }
+
+            45% {
+                opacity: 0.95;
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(26);
+                background: transparent;
+            }
+        }
+
+        .supernova-spark {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 6px;
+            height: 6px;
+            margin-left: -3px;
+            margin-top: -3px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 8px #fde047, 0 0 16px #d97706;
+            opacity: 0;
+        }
+
+            .supernova-spark.fly {
+                animation: sparkScatter 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+
+        @keyframes sparkScatter {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1.4);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.1);
+            }
+        }
+
+        /* =========================================================
+           6. КАРТОЧКА СВЕТИЛА (АДАПТИВНАЯ ДЛЯ СМАРТФОНОВ)
+           ========================================================= */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 3, 10, 0.68);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+            touch-action: auto;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            padding: 12px;
+        }
+
+            .modal-backdrop.open {
+                display: flex;
+                opacity: 1;
+            }
+
+        .star-card {
+            position: relative;
+            width: 410px;
+            max-width: 100%;
+            max-height: 90dvh;
+            overflow-y: auto;
+            background: linear-gradient(160deg, rgba(18, 14, 30, 0.97), rgba(7, 8, 18, 0.99));
+            border: 1px solid #c59b48;
+            outline: 1px solid rgba(197, 155, 72, 0.3);
+            outline-offset: -6px;
+            border-radius: 4px;
+            padding: 24px 22px 20px;
+            box-shadow: 0 20px 55px rgba(0, 0, 0, 0.95), 0 0 35px rgba(212, 175, 55, 0.22), inset 0 0 30px rgba(197, 155, 72, 0.08);
+            transform: scale(0.86);
+            opacity: 0;
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+        }
+
+        .modal-backdrop.open .star-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .star-card::before,
+        .star-card::after {
+            content: "✦";
+            position: absolute;
+            color: #d4af37;
+            font-size: 11px;
+        }
+
+        .star-card::before {
+            top: 8px;
+            left: 10px;
+        }
+
+        .star-card::after {
+            bottom: 8px;
+            right: 10px;
+        }
+
+        .card-close {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #c59b48;
+            font-size: 20px;
+            padding: 6px 10px;
+            cursor: pointer;
+            z-index: 5;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+            .card-close:hover {
+                color: #fef08a;
+                transform: scale(1.2);
+            }
+
+        .arriving-star-stage {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .golden-rays {
+            position: absolute;
+            inset: -14px;
+            border-radius: 50%;
+            background: repeating-conic-gradient( from 0deg, rgba(253, 224, 71, 0.42) 0deg 8deg, transparent 8deg 24deg, rgba(212, 175, 55, 0.28) 24deg 30deg, transparent 30deg 45deg );
+            mask-image: radial-gradient(circle, rgba(0,0,0,1) 20%, rgba(0,0,0,0.45) 52%, transparent 72%);
+            -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 20%, rgba(0,0,0,0.45) 52%, transparent 72%);
+            animation: rotateGoldenRays 16s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateGoldenRays {
+            0% {
+                transform: rotate(0deg) scale(0.96);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.06);
+            }
+
+            100% {
+                transform: rotate(360deg) scale(0.96);
+            }
+        }
+
+        .flying-star-icon {
+            width: 40px;
+            height: 40px;
+            z-index: 2;
+            filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 16px #fde047) drop-shadow(0 0 28px #eab308);
+        }
+
+        .card-subtitle {
+            text-align: center;
+            font-size: 10px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #c59b48;
+            margin-bottom: 4px;
+        }
+
+        .card-star-title {
+            text-align: center;
+            font-size: 20px;
+            color: #fef9c3;
+            margin: 0 0 14px;
+            text-shadow: 0 0 12px rgba(254, 240, 138, 0.35);
+            border-bottom: 1px solid rgba(156, 120, 56, 0.3);
+            padding-bottom: 8px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 10px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #c59b48;
+            margin-bottom: 5px;
+        }
+
+        .pill-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .pill-btn {
+            background: rgba(8, 10, 20, 0.9);
+            border: 1px solid #5c451e;
+            color: #c4b59b;
+            font-family: 'Georgia', serif;
+            font-size: 11px;
+            padding: 9px 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+            .pill-btn:hover {
+                border-color: #d4af37;
+                color: #fef9c3;
+            }
+
+            .pill-btn.active-stage-0 {
+                background: rgba(254, 249, 195, 0.16);
+                border-color: #fef9c3;
+                color: #fefce8;
+                box-shadow: 0 0 10px rgba(254, 249, 195, 0.25);
+            }
+
+            .pill-btn.active-stage-1 {
+                background: rgba(250, 204, 21, 0.24);
+                border-color: #fde047;
+                color: #fef08a;
+                box-shadow: 0 0 12px rgba(250, 204, 21, 0.35);
+            }
+
+            .pill-btn.active-stage-2 {
+                background: rgba(217, 119, 6, 0.32);
+                border-color: #f59e0b;
+                color: #fbbf24;
+                font-weight: bold;
+                box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+            }
+
+            .pill-btn.active-diff {
+                background: rgba(184, 142, 60, 0.26);
+                border-color: #e0be6b;
+                color: #fef9c3;
+                font-weight: bold;
+            }
+
+        .notes-area {
+            width: 100%;
+            height: 105px;
+            resize: vertical;
+            background: rgba(4, 5, 12, 0.92);
+            border: 1px solid #6e5324;
+            border-radius: 3px;
+            padding: 10px;
+            color: #f7ead2;
+            font-family: 'Georgia', serif;
+            font-size: 14px;
+            line-height: 1.45;
+            outline: none;
+            margin-bottom: 14px;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+            .notes-area:focus {
+                border-color: #d4af37;
+                box-shadow: 0 0 12px rgba(212, 175, 55, 0.22);
+            }
+
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .btn-danger {
+            background: rgba(65, 16, 22, 0.85);
+            border: 1px solid #b91c1c;
+            color: #fca5a5;
+            font-family: 'Georgia', serif;
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 9px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+            .btn-danger:hover {
+                background: rgba(153, 27, 27, 0.9);
+                color: #ffffff;
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+            }
+
+        /* =========================================================
+           7. МОБИЛЬНАЯ АДАПТАЦИЯ (ЭКРАНЫ ДО 768PX)
+           ========================================================= */
+        @media (max-width: 768px) {
+            .astrolabe-panel {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                width: auto;
+                padding: 10px 12px;
+            }
+
+            .panel-header {
+                justify-content: space-between;
+            }
+
+            .panel-toggle-mobile {
+                display: inline-block;
+            }
+
+            .astrolabe-panel.collapsed .panel-body {
+                display: none;
+            }
+
+            .astrolabe-panel.collapsed .panel-header {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            /* 16px предотвращает нежелательный автозум экрана на iPhone/Android при тапе в поле */
+            .astrolabe-panel input,
+            .astrolabe-panel select,
+            .notes-area {
+                font-size: 16px;
+            }
+
+            .btn-gold,
+            .btn-link-mode {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .star-card {
+                padding: 20px 16px 18px;
+            }
+
+            .pill-btn {
+                padding: 10px 3px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="night-sky-gradient"></div>
+    <div class="cosmos-violet-wave"></div>
+    <div class="cosmos-blue-wave"></div>
+
+    <!-- Адаптивная старинная панель -->
+    <div id="astrolabePanel" class="astrolabe-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+        <div class="panel-header">
+            <div class="panel-title">Обсерватория</div>
+            <button type="button" id="mobileToggleBtn" class="panel-toggle-mobile" onclick="toggleMobilePanel()">▲ Свернуть</button>
+        </div>
+        <div class="panel-body">
+            <input type="text" id="starTitle" placeholder="Новое светило..." onkeydown="if(event.key==='Enter') addStar()" />
+            <select id="newStarDifficulty" title="Сложность темы">
+                <option value="1">✦ Сложность: Лёгкая</option>
+                <option value="2" selected>✦✦ Сложность: Средняя</option>
+                <option value="3">✦✦✦ Сложность: Высокая</option>
+            </select>
+            <button class="btn-gold" onclick="addStar()">Зажечь звезду</button>
+            <button id="linkModeBtn" class="btn-link-mode" onclick="toggleLinkMode()">✦ Связать звёзды</button>
+            <div id="navHint" class="nav-hint">Нажми на звезду для конспекта • Тяни для переноса</div>
+        </div>
+    </div>
+
+    <!-- Безграничное небо -->
+    <div id="viewport">
+        <div id="sky-canvas">
+            <svg id="constellation-lines"></svg>
+            <div id="stars-layer"></div>
+        </div>
+    </div>
+
+    <!-- Слой полёта звезды с реалистичными лучами на весь экран и взрывом -->
+    <div id="star-flight-layer">
+        <div class="flight-dimmer"></div>
+        <div id="cometTraveler" class="comet-traveler">
+            <div class="comet-spike-horizontal"></div>
+            <div class="comet-spike-vertical"></div>
+            <div class="comet-spike-diag-1"></div>
+            <div class="comet-spike-diag-2"></div>
+            <div class="comet-rays"></div>
+            <div class="comet-aura"></div>
+            <svg class="comet-core-svg" viewBox="0 0 64 64">
+                <polygon points="32,0 35.5,24.5 46,16 39.5,28.5 64,32 39.5,35.5 46,48 35.5,39.5 32,64 28.5,39.5 18,48 24.5,35.5 0,32 24.5,28.5 18,16 28.5,24.5" fill="#ffffff" />
+                <circle cx="32" cy="32" r="7" fill="#ffffff" />
+            </svg>
+        </div>
+        <div id="supernovaShockwave" class="supernova-shockwave"></div>
+        <div id="sparksContainer"></div>
+    </div>
+
+    <!-- Модальная карточка звезды -->
+    <div id="starModal" class="modal-backdrop" onclick="closeStarCard()">
+        <div class="star-card" onclick="event.stopPropagation()">
+            <button class="card-close" onclick="closeStarCard()" title="Закрыть">✕</button>
+
+            <div class="arriving-star-stage">
+                <div class="golden-rays"></div>
+                <svg class="flying-star-icon" viewBox="0 0 64 64">
+                    <polygon points="32,0 35.5,24.5 46,16 39.5,28.5 64,32 39.5,35.5 46,48 35.5,39.5 32,64 28.5,39.5 18,48 24.5,35.5 0,32 24.5,28.5 18,16 28.5,24.5" fill="#ffffff" />
+                    <circle cx="32" cy="32" r="6" fill="#ffffff" />
+                </svg>
+            </div>
+
+            <div class="card-subtitle">Скрижаль светила</div>
+            <h2 id="cardStarTitle" class="card-star-title">Название темы</h2>
+
+            <span class="field-label">Сияние звезды (этап изучения):</span>
+            <div class="pill-group" id="stageGroup">
+                <button type="button" class="pill-btn" data-stage="0" onclick="selectStage(0)">✦ Светло-жёлтая</button>
+                <button type="button" class="pill-btn" data-stage="1" onclick="selectStage(1)">✦ Ярко-жёлтая</button>
+                <button type="button" class="pill-btn" data-stage="2" onclick="selectStage(2)">👑 Золотая</button>
+            </div>
+
+            <span class="field-label">Сложность темы:</span>
+            <div class="pill-group" id="difficultyGroup">
+                <button type="button" class="pill-btn" data-diff="1" onclick="selectDifficulty(1)">✦ Лёгкая</button>
+                <button type="button" class="pill-btn" data-diff="2" onclick="selectDifficulty(2)">✦✦ Средняя</button>
+                <button type="button" class="pill-btn" data-diff="3" onclick="selectDifficulty(3)">✦✦✦ Высокая</button>
+            </div>
+
+            <label class="field-label" for="cardNotes">Конспект / Ссылка на материал:</label>
+            <textarea id="cardNotes" class="notes-area" placeholder="Запиши сюда ключевую идею по методу Корнелла или ссылку на Metanit..."></textarea>
+
+            <div class="card-actions">
+                <button class="btn-danger" onclick="deleteCurrentStar()">Погасить звезду</button>
+                <button class="btn-gold" onclick="saveStarDetails()">Сохранить запись</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                let panX = 0;
+                let panY = 0;
+                let scale = 1;
+                let isPanning = false;
+                let startPanMouseX = 0;
+                let startPanMouseY = 0;
+
+                // Переменные для зума двумя пальцами (pinch-to-zoom) на телефоне
+                let initialPinchDistance = null;
+                let initialPinchScale = 1;
+                let pinchCenterX = 0;
+                let pinchCenterY = 0;
+
+                let draggedStar = null;
+                let isAnimatingStar = false;
+
+                let starsMap = new Map();
+                let connectionsList = [];
+
+                let isLinkMode = false;
+                let firstSelectedStarId = null;
+                let activeCardStarId = null;
+
+                let selectedStage = 0;
+                let selectedDifficulty = 2;
+
+                const astrolabePanel = document.getElementById('astrolabePanel');
+                const mobileToggleBtn = document.getElementById('mobileToggleBtn');
+                const viewport = document.getElementById('viewport');
+                const skyCanvas = document.getElementById('sky-canvas');
+                const linesSvg = document.getElementById('constellation-lines');
+                const starsLayer = document.getElementById('stars-layer');
+                const linkModeBtn = document.getElementById('linkModeBtn');
+                const navHint = document.getElementById('navHint');
+                const starModal = document.getElementById('starModal');
+
+                const flightLayer = document.getElementById('star-flight-layer');
+                const cometTraveler = document.getElementById('cometTraveler');
+                const shockwave = document.getElementById('supernovaShockwave');
+                const sparksContainer = document.getElementById('sparksContainer');
+
+                // Сворачивание/разворачивание верхней панели на телефоне
+                function toggleMobilePanel() {
+                    const collapsed = astrolabePanel.classList.toggle('collapsed');
+                    mobileToggleBtn.textContent = collapsed ? '▼ Меню' : '▲ Свернуть';
+                }
+
+                function getStarSvgMarkup(difficulty) {
+                    if (difficulty === 1) {
+                        return `
+                            <svg class="star-svg" viewBox="0 0 24 24">
+                                <polygon points="12,1 14.9,8.8 23,9.2 16.6,14.4 18.8,22.4 12,17.8 5.2,22.4 7.4,14.4 1,9.2 9.1,8.8" fill="var(--core-fill)"/>
+                            </svg>
+                        `;
+                    }
+                    if (difficulty === 2) {
+                        return `
+                            <svg class="star-svg" viewBox="0 0 48 48">
+                                <polygon points="24,1 27.2,19.5 34,14 28.5,20.8 47,24 28.5,27.2 34,34 27.2,28.5 24,47 20.8,28.5 14,34 19.5,27.2 1,24 19.5,20.8 14,14 20.8,19.5" fill="var(--core-fill)"/>
+                                <circle cx="24" cy="24" r="4.5" fill="#ffffff"/>
+                            </svg>
+                        `;
+                    }
+                    return `
+                        <svg class="star-svg" viewBox="0 0 64 64">
+                            <polygon points="32,0 34.8,25.5 48,16 38.5,29.2 64,32 38.5,34.8 48,48 34.8,38.5 32,64 29.2,38.5 16,48 25.5,34.8 0,32 25.5,29.2 16,16 29.2,25.5" fill="var(--core-fill)"/>
+                            <polygon points="32,10 33.6,29 54,32 33.6,35 32,54 30.4,35 10,32 30.4,29" fill="#ffffff" opacity="0.95"/>
+                            <circle cx="32" cy="32" r="5.5" fill="#ffffff"/>
+                        </svg>
+                    `;
+                }
+
+                function updateTransform() {
+                    skyCanvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+                }
+
+                function toggleLinkMode() {
+                    isLinkMode = !isLinkMode;
+                    clearSelectedStar();
+
+                    if (isLinkMode) {
+                        linkModeBtn.classList.add('active');
+                        linkModeBtn.textContent = '✕ Отменить связь';
+                        navHint.textContent = 'Нажми на первую звезду, затем на вторую (или на нить для удаления)';
+                    } else {
+                        linkModeBtn.classList.remove('active');
+                        linkModeBtn.textContent = '✦ Связать звёзды';
+                        navHint.textContent = 'Нажми на звезду для конспекта • Тяни для переноса';
+                    }
+                }
+
+                function clearSelectedStar() {
+                    if (firstSelectedStarId && starsMap.has(firstSelectedStarId)) {
+                        starsMap.get(firstSelectedStarId).element.classList.remove('selected-for-link');
+                    }
+                    firstSelectedStarId = null;
+                }
+
+                function renderConnections() {
+                    linesSvg.innerHTML = '';
+
+                    connectionsList.forEach(conn => {
+                        const fromStar = starsMap.get(conn.fromStarId);
+                        const toStar = starsMap.get(conn.toStarId);
+                        if (!fromStar || !toStar) return;
+
+                        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                        group.setAttribute('class', 'constellation-group');
+
+                        // Широкая невидимая линия для удобного нажатия пальцем на телефоне
+                        const hitLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        hitLine.setAttribute('class', 'constellation-hit-area');
+                        hitLine.setAttribute('x1', fromStar.posX);
+                        hitLine.setAttribute('y1', fromStar.posY - 7);
+                        hitLine.setAttribute('x2', toStar.posX);
+                        hitLine.setAttribute('y2', toStar.posY - 7);
+
+                        const visibleLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        visibleLine.setAttribute('class', 'constellation-line');
+                        visibleLine.setAttribute('x1', fromStar.posX);
+                        visibleLine.setAttribute('y1', fromStar.posY - 7);
+                        visibleLine.setAttribute('x2', toStar.posX);
+                        visibleLine.setAttribute('y2', toStar.posY - 7);
+
+                        // На ПК — двойной клик, на телефоне в режиме связывания — одиночный тап по нити
+                        hitLine.addEventListener('dblclick', async (e) => {
+                            e.stopPropagation();
+                            await deleteConnection(conn.id);
+                        });
+
+                        hitLine.addEventListener('click', async (e) => {
+                            if (!isLinkMode) return;
+                            e.stopPropagation();
+                            await deleteConnection(conn.id);
+                        });
+
+                        group.appendChild(hitLine);
+                        group.appendChild(visibleLine);
+                        linesSvg.appendChild(group);
+                    });
+                }
+
+                function selectStage(stage) {
+                    selectedStage = stage;
+                    document.querySelectorAll('#stageGroup .pill-btn').forEach(btn => {
+                        btn.className = 'pill-btn';
+                        if (Number(btn.dataset.stage) === stage) {
+                            btn.classList.add(`active-stage-${stage}`);
+                        }
+                    });
+                }
+
+                function selectDifficulty(diff) {
+                    selectedDifficulty = diff;
+                    document.querySelectorAll('#difficultyGroup .pill-btn').forEach(btn => {
+                        btn.className = 'pill-btn';
+                        if (Number(btn.dataset.diff) === diff) {
+                            btn.classList.add('active-diff');
+                        }
+                    });
+                }
+
+                function launchStarSequence(starId) {
+                    if (isAnimatingStar) return;
+                    const star = starsMap.get(starId);
+                    if (!star) return;
+
+                    isAnimatingStar = true;
+
+                    const visualEl = star.element.querySelector('.star-visual');
+                    const rect = visualEl.getBoundingClientRect();
+                    const startX = rect.left + rect.width / 2;
+                    const startY = rect.top + rect.height / 2;
+
+                    const centerX = window.innerWidth / 2;
+                    const centerY = window.innerHeight / 2;
+
+                    // Адаптивный размах ветра под ширину экрана (и на телефоне, и на мониторе)
+                    const swayAmplitudeX = Math.min(window.innerWidth * 0.38, 420);
+                    const swayAmplitudeY = Math.min(window.innerHeight * 0.14, 110);
+                    const swayDir = startX < centerX ? 1 : -1;
+
+                    cometTraveler.style.transition = 'none';
+                    cometTraveler.style.opacity = '1';
+                    shockwave.classList.remove('burst');
+                    sparksContainer.innerHTML = '';
+                    flightLayer.classList.add('active');
+
+                    const flightDuration = 3500;
+                    const startTime = performance.now();
+
+                    function animateLeafWind(now) {
+                        const elapsed = now - startTime;
+                        const t = Math.min(elapsed / flightDuration, 1);
+
+                        const ease = -(Math.cos(Math.PI * t) - 1) / 2;
+
+                        const baseX = startX + (centerX - startX) * ease;
+                        const baseY = startY + (centerY - startY) * ease;
+
+                        const envelope = Math.sin(Math.PI * t) * (1 - t * 0.35);
+                        const wavePhase = t * Math.PI * 3.0;
+                        const windOffsetX = Math.sin(wavePhase) * swayAmplitudeX * envelope * swayDir;
+                        const windOffsetY = Math.cos(wavePhase * 1.4) * swayAmplitudeY * envelope;
+
+                        const currentX = baseX + windOffsetX;
+                        const currentY = baseY + windOffsetY;
+
+                        const tiltAngle = Math.cos(wavePhase) * 24 * envelope * swayDir;
+                        const currentScale = 0.65 + ease * 1.65;
+
+                        cometTraveler.style.left = currentX + 'px';
+                        cometTraveler.style.top = currentY + 'px';
+                        cometTraveler.style.transform = `scale(${currentScale.toFixed(3)}) rotate(${tiltAngle.toFixed(1)}deg)`;
+
+                        if (t < 1) {
+                            requestAnimationFrame(animateLeafWind);
+                        } else {
+                            triggerSupernova(starId);
+                        }
+                    }
+
+                    requestAnimationFrame(animateLeafWind);
+                }
+
+                function triggerSupernova(starId) {
+                    cometTraveler.style.transition = 'opacity 0.2s ease, transform 0.25s ease';
+                    cometTraveler.style.transform = 'scale(3.2) rotate(0deg)';
+                    cometTraveler.style.opacity = '0';
+
+                    shockwave.classList.add('burst');
+
+                    for (let i = 0; i < 16; i++) {
+                        const spark = document.createElement('div');
+                        spark.className = 'supernova-spark';
+                        const angle = (Math.PI * 2 * i) / 16 + (Math.random() - 0.5) * 0.25;
+                        const distance = Math.min(window.innerWidth, window.innerHeight) * 0.28 + Math.random() * 90;
+                        spark.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+                        spark.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+                        sparksContainer.appendChild(spark);
+                        spark.offsetHeight;
+                        spark.classList.add('fly');
+                    }
+
+                    setTimeout(() => {
+                        openStarCard(starId);
+                    }, 260);
+
+                    setTimeout(() => {
+                        flightLayer.classList.remove('active');
+                        shockwave.classList.remove('burst');
+                        sparksContainer.innerHTML = '';
+                        isAnimatingStar = false;
+                    }, 780);
+                }
+
+                function openStarCard(starId) {
+                    const star = starsMap.get(starId);
+                    if (!star) return;
+
+                    activeCardStarId = starId;
+                    document.getElementById('cardStarTitle').textContent = star.title;
+
+                    selectStage(star.stage ?? 0);
+                    selectDifficulty(star.difficulty ?? 2);
+                    document.getElementById('cardNotes').value = star.notes || '';
+
+                    starModal.classList.add('open');
+                }
+
+                function closeStarCard() {
+                    starModal.classList.remove('open');
+                    activeCardStarId = null;
+                }
+
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && starModal.classList.contains('open')) {
+                        closeStarCard();
+                    }
+                });
+
+                async function saveStarDetails() {
+                    if (!activeCardStarId) return;
+
+                    const notes = document.getElementById('cardNotes').value.trim();
+
+                    try {
+                        const response = await fetch(`/api/stars/${activeCardStarId}/details`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                stage: selectedStage,
+                                difficulty: selectedDifficulty,
+                                notes: notes
+                            })
+                        });
+
+                        if (response.ok) {
+                            const star = starsMap.get(activeCardStarId);
+                            if (star) {
+                                star.stage = selectedStage;
+                                star.difficulty = selectedDifficulty;
+                                star.notes = notes;
+                                star.element.className = `star stage-${selectedStage} diff-${selectedDifficulty}`;
+
+                                const visualEl = star.element.querySelector('.star-visual');
+                                visualEl.innerHTML = `
+                                    <div class="star-corona-ring"></div>
+                                    <div class="star-trail-glow"></div>
+                                    ${getStarSvgMarkup(selectedDifficulty)}
+                                `;
+                            }
+                            closeStarCard();
+                        } else {
+                            const errText = await response.text();
+                            alert('Не удалось сохранить: ' + response.status + ' ' + errText);
+                        }
+                    } catch (err) {
+                        alert('Ошибка соединения с сервером: ' + err.message);
+                    }
+                }
+
+                async function deleteCurrentStar() {
+                    if (!activeCardStarId) return;
+
+                    const response = await fetch(`/api/stars/${activeCardStarId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        closeStarCard();
+                        await loadSky();
+                    }
+                }
+
+                // =========================================================
+                // ОБЩИЕ ОБРАБОТЧИКИ ПЕРЕТАСКИВАНИЯ И ПАНОРАМИРОВАНИЯ (МЫШЬ + ПАЛЬЦЫ)
+                // =========================================================
+                function handlePointerDownSky(clientX, clientY) {
+                    if (draggedStar || isAnimatingStar) return;
+                    isPanning = true;
+                    startPanMouseX = clientX - panX;
+                    startPanMouseY = clientY - panY;
+                }
+
+                function handlePointerMove(clientX, clientY, moveThreshold) {
+                    if (draggedStar) {
+                        const dx = (clientX - draggedStar.startMouseX) / scale;
+                        const dy = (clientY - draggedStar.startMouseY) / scale;
+
+                        if (Math.abs(dx) > moveThreshold || Math.abs(dy) > moveThreshold) {
+                            draggedStar.hasMoved = true;
+                        }
+
+                        if (draggedStar.hasMoved) {
+                            const newX = Math.round(draggedStar.startX + dx);
+                            const newY = Math.round(draggedStar.startY + dy);
+
+                            draggedStar.currentX = newX;
+                            draggedStar.currentY = newY;
+                            draggedStar.element.style.left = newX + 'px';
+                            draggedStar.element.style.top = newY + 'px';
+
+                            const starData = starsMap.get(draggedStar.id);
+                            if (starData) {
+                                starData.posX = newX;
+                                starData.posY = newY;
+                                renderConnections();
+                            }
+                        }
+                        return;
+                    }
+
+                    if (isPanning) {
+                        panX = clientX - startPanMouseX;
+                        panY = clientY - startPanMouseY;
+                        updateTransform();
+                    }
+                }
+
+                async function handlePointerUp() {
+                    isPanning = false;
+                    initialPinchDistance = null;
+
+                    if (draggedStar) {
+                        const starToSave = draggedStar;
+                        starToSave.element.classList.remove('dragging');
+                        draggedStar = null;
+
+                        if (starToSave.hasMoved) {
+                            await saveStarPosition(starToSave.id, starToSave.currentX, starToSave.currentY);
+                        } else {
+                            launchStarSequence(starToSave.id);
+                        }
+                    }
+                }
+
+                // События мыши (ПК)
+                viewport.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return;
+                    handlePointerDownSky(e.clientX, e.clientY);
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    handlePointerMove(e.clientX, e.clientY, 8);
+                });
+
+                window.addEventListener('mouseup', () => {
+                    handlePointerUp();
+                });
+
+                // События сенсорного экрана (Телефоны и планшеты)
+                viewport.addEventListener('touchstart', (e) => {
+                    if (isAnimatingStar) return;
+
+                    if (e.touches.length === 2) {
+                        // Старт зума двумя пальцами
+                        isPanning = false;
+                        draggedStar = null;
+                        const dx = e.touches[0].clientX - e.touches[1].clientX;
+                        const dy = e.touches[0].clientY - e.touches[1].clientY;
+                        initialPinchDistance = Math.hypot(dx, dy);
+                        initialPinchScale = scale;
+                        pinchCenterX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                        pinchCenterY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    } else if (e.touches.length === 1) {
+                        handlePointerDownSky(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }, { passive: false });
+
+                window.addEventListener('touchmove', (e) => {
+                    if (starModal.classList.contains('open')) return;
+
+                    if (e.touches.length === 2 && initialPinchDistance) {
+                        e.preventDefault();
+                        const dx = e.touches[0].clientX - e.touches[1].clientX;
+                        const dy = e.touches[0].clientY - e.touches[1].clientY;
+                        const currentDistance = Math.hypot(dx, dy);
+                        const newScale = Math.min(Math.max(0.35, initialPinchScale * (currentDistance / initialPinchDistance)), 2.5);
+
+                        panX = pinchCenterX - (pinchCenterX - panX) * (newScale / scale);
+                        panY = pinchCenterY - (pinchCenterY - panY) * (newScale / scale);
+                        scale = newScale;
+                        updateTransform();
+                        return;
+                    }
+
+                    if (e.touches.length === 1 && (draggedStar || isPanning)) {
+                        e.preventDefault();
+                        // Порог сдвига 12px, чтобы нажатие пальцем по звезде не путалось с перетаскиванием
+                        handlePointerMove(e.touches[0].clientX, e.touches[0].clientY, 12);
+                    }
+                }, { passive: false });
+
+                window.addEventListener('touchend', () => {
+                    handlePointerUp();
+                });
+
+                async function saveStarPosition(id, posX, posY) {
+                    try {
+                        await fetch(`/api/stars/${id}/position`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ posX, posY })
+                        });
+                    } catch (err) {
+                        console.error('Ошибка сохранения координат:', err);
+                    }
+                }
+
+                async function createConnection(fromStarId, toStarId) {
+                    const response = await fetch('/api/connections', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fromStarId, toStarId })
+                    });
+
+                    if (response.ok) {
+                        const newConn = await response.json();
+                        connectionsList.push(newConn);
+                        renderConnections();
+                    }
+                }
+
+                async function deleteConnection(id) {
+                    const response = await fetch(`/api/connections/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        connectionsList = connectionsList.filter(c => c.id !== id);
+                        renderConnections();
+                    }
+                }
+
+                viewport.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const zoomIntensity = 0.0012;
+                    const newScale = Math.min(Math.max(0.35, scale - e.deltaY * zoomIntensity), 2.5);
+
+                    const rect = viewport.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+
+                    panX = mouseX - (mouseX - panX) * (newScale / scale);
+                    panY = mouseY - (mouseY - panY) * (newScale / scale);
+                    scale = newScale;
+
+                    updateTransform();
+                }, { passive: false });
+
+                async function handleStarLinkSelection(star, el) {
+                    if (!firstSelectedStarId) {
+                        firstSelectedStarId = star.id;
+                        el.classList.add('selected-for-link');
+                        navHint.textContent = `Выбрана «${star.title}». Нажми на вторую`;
+                    } else if (firstSelectedStarId === star.id) {
+                        clearSelectedStar();
+                        navHint.textContent = 'Нажми на первую звезду, затем на вторую';
+                    } else {
+                        const fromId = firstSelectedStarId;
+                        clearSelectedStar();
+                        await createConnection(fromId, star.id);
+                        navHint.textContent = 'Нить натянута! Выбери следующую пару';
+                    }
+                }
+
+                function startDraggingStar(starId, el, clientX, clientY) {
+                    const starData = starsMap.get(starId);
+                    el.classList.add('dragging');
+                    draggedStar = {
+                        id: starId,
+                        element: el,
+                        startX: starData.posX,
+                        startY: starData.posY,
+                        currentX: starData.posX,
+                        currentY: starData.posY,
+                        startMouseX: clientX,
+                        startMouseY: clientY,
+                        hasMoved: false
+                    };
+                }
+
+                async function loadSky() {
+                    const [starsRes, connRes] = await Promise.all([
+                        fetch('/api/stars'),
+                        fetch('/api/connections')
+                    ]);
+
+                    const stars = await starsRes.json();
+                    connectionsList = await connRes.json();
+
+                    starsLayer.innerHTML = '';
+                    starsMap.clear();
+
+                    stars.forEach(star => {
+                        const stage = star.stage ?? 0;
+                        const diff = star.difficulty ?? 2;
+
+                        const el = document.createElement('div');
+                        el.className = `star stage-${stage} diff-${diff}`;
+                        el.style.left = star.posX + 'px';
+                        el.style.top = star.posY + 'px';
+
+                        const duration = (1.7 + (star.id % 4) * 0.35).toFixed(2) + 's';
+                        const delay = ((star.id * 0.55) % 2.4).toFixed(2) + 's';
+
+                        el.innerHTML = `
+                            <div class="star-visual" style="--duration: ${duration}; --delay: -${delay};">
+                                <div class="star-corona-ring"></div>
+                                <div class="star-trail-glow"></div>
+                                ${getStarSvgMarkup(diff)}
+                            </div>
+                            <div class="star-label">${star.title}</div>
+                        `;
+
+                        // Клик/тап для режима связывания
+                        el.addEventListener('click', async (e) => {
+                            if (!isLinkMode) return;
+                            e.stopPropagation();
+                            await handleStarLinkSelection(star, el);
+                        });
+
+                        // Мышь (ПК)
+                        el.addEventListener('mousedown', (e) => {
+                            if (e.button !== 0 || isLinkMode || isAnimatingStar) return;
+                            e.stopPropagation();
+                            startDraggingStar(star.id, el, e.clientX, e.clientY);
+                        });
+
+                        // Касание пальцем (Смартфоны)
+                        el.addEventListener('touchstart', (e) => {
+                            if (e.touches.length !== 1 || isAnimatingStar) return;
+                            e.stopPropagation();
+
+                            if (isLinkMode) {
+                                e.preventDefault();
+                                handleStarLinkSelection(star, el);
+                                return;
+                            }
+
+                            startDraggingStar(star.id, el, e.touches[0].clientX, e.touches[0].clientY);
+                        }, { passive: false });
+
+                        starsLayer.appendChild(el);
+                        starsMap.set(star.id, { ...star, stage, difficulty: diff, element: el });
+                    });
+
+                    renderConnections();
+                }
+
+                async function addStar() {
+                    const input = document.getElementById('starTitle');
+                    const title = input.value.trim();
+                    if (!title) return;
+
+                    const difficulty = Number(document.getElementById('newStarDifficulty').value);
+
+                    const isMobile = window.innerWidth <= 768;
+                    const screenCenterX = isMobile ? window.innerWidth / 2 : (window.innerWidth - 260) / 2;
+                    const screenCenterY = isMobile ? window.innerHeight * 0.62 : window.innerHeight / 2;
+
+                    const worldCenterX = (screenCenterX - panX) / scale;
+                    const worldCenterY = (screenCenterY - panY) / scale;
+
+                    const spreadX = isMobile ? 160 : 320;
+                    const spreadY = isMobile ? 180 : 260;
+
+                    const posX = Math.round(worldCenterX + (Math.random() - 0.5) * spreadX);
+                    const posY = Math.round(worldCenterY + (Math.random() - 0.5) * spreadY);
+
+                    const response = await fetch('/api/stars', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title,
+                            posX,
+                            posY,
+                            stage: 0,
+                            difficulty,
+                            notes: null
+                        })
+                    });
+
+                    if (response.ok) {
+                        input.value = '';
+                        await loadSky();
+                    }
+                }
+
+                loadSky();
+    </script>
+</body>
+</html>
