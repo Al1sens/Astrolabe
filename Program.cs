@@ -1,4 +1,5 @@
 using Astrolabe.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,22 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // ШАГ 3: Подключаем слоника (Npgsql)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "Astrolabe.Auth";
+        options.Cookie.HttpOnly = true; // Защита: JS на странице не сможет украсть куку
+        options.ExpireTimeSpan = TimeSpan.FromDays(30); // Запоминаем вход на 30 дней
+        options.SlidingExpiration = true; // Продлеваем срок, если пользователь заходит на сайт
+
+        // Для API-запросов (fetch) отдаём код 401 вместо редиректа на страницу логина
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+    });
 
 // ШАГ 4: Собираем объект приложения (только после этого появляется переменная app!)
 var app = builder.Build();

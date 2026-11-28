@@ -15,6 +15,8 @@ public class AppDbContext : DbContext
 
     public DbSet<StarConnection> StarConnections { get; set; }
 
+    public DbSet<User> Users { get; set; }
+
     //Настраиваем два внешних ключа на одну таблицу Stars
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

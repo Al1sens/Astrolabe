@@ -71,9 +71,35 @@ namespace Astrolabe.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Stars");
+                });
+
+            modelBuilder.Entity("Astrolabe.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Astrolabe.Models.StarConnection", b =>
@@ -93,6 +119,22 @@ namespace Astrolabe.Migrations
                     b.Navigation("FromStar");
 
                     b.Navigation("ToStar");
+                });
+
+            modelBuilder.Entity("Astrolabe.Models.StarNode", b =>
+                {
+                    b.HasOne("Astrolabe.Models.User", "User")
+                        .WithMany("Stars")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Astrolabe.Models.User", b =>
+                {
+                    b.Navigation("Stars");
                 });
 #pragma warning restore 612, 618
         }
